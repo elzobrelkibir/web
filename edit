@@ -1,0 +1,48 @@
+<?php
+include 'conn.php';
+if (isset($_GET['id'])) {
+$id = $_GET['id'];
+$sql = "SELECT * FROM images WHERE id = $id";
+$result = $conn->query($sql);
+$image = $result->fetch_assoc();
+}
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+$id = $_POST['id'];
+$image_name = $_POST['image_name'];
+if (!empty($_FILES['new_image']['name'])) {
+$image_tmp = $_FILES['new_image']['tmp_name'];
+$upload_folder = 'uploads/';
+$new_file_path = $upload_folder . basename($_FILES['new_image']['name']);
+move_uploaded_file($image_tmp, $new_file_path);
+$sql = "UPDATE images SET image_name = '$image_name', file_path = '$new_file_path' WHERE
+id = $id";
+} else {
+$sql = "UPDATE images SET image_name = '$image_name' WHERE id = $id";
+}
+if ($conn->query($sql) === TRUE) {
+header("Location: display.php");
+} else {
+echo "Error updating record: " . $conn->error;
+}
+}
+?>
+<!DOCTYPE html>
+<html>
+<head>
+<title>Edit Image</title>
+</head>
+<body>
+<h2>Edit Image</h2>
+<form action="edit.php" method="POST" enctype="multipart/form-data">
+<input type="hidden" name="id" value="<?php echo $image['id']; ?>">
+<label>Image Name:</label>
+<input type="text" name="image_name" value="<?php echo $image['image_name']; ?>" required>
+<br>
+<label>Upload New Image (Optional):</label>
+<input type="file" name="new_image">
+<br>
+<button type="submit">Update</button>
+</form>
+<a href="display.php">Back to Images</a>
+</body>
+</html>
