@@ -1,0 +1,19 @@
+<?php
+include 'conn.php';
+if (isset($_GET['id'])) {
+$id = $_GET['id'];
+// Get file path
+$sql = "SELECT file_path FROM images WHERE id = $id";
+$result = $conn->query($sql);
+$row = $result->fetch_assoc();
+// Delete file from folder
+if (file_exists($row['file_path'])) {
+unlink($row['file_path']);
+}
+// Delete record from database
+$delete_sql = "DELETE FROM images WHERE id = $id";
+if ($conn->query($delete_sql) === TRUE) {
+header("Location: display.php");
+} else {
+echo "Error deleting record: " . $conn->error;
+}}?>
