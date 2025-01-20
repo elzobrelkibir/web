@@ -1,0 +1,37 @@
+<?php
+include 'conn.php';
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+$image_name = $_FILES['image']['name'];
+$image_tmp = $_FILES['image']['tmp_name'];
+$upload_folder = 'uploads/';
+// Create the folder if it doesn't exist
+if (!file_exists($upload_folder)) {
+mkdir($upload_folder, 0777, true);
+}
+$file_path = $upload_folder . basename($image_name);
+if (move_uploaded_file($image_tmp, $file_path)) {
+$sql = "INSERT INTO images (image_name, file_path) VALUES ('$image_name', '$file_path')";
+if ($conn->query($sql) === TRUE) {
+echo "Image uploaded successfully!";
+} else {
+echo "Error: " . $conn->error;
+}
+} else {
+echo "Failed to upload image.";
+}
+}
+?>
+<!DOCTYPE html>
+<html>
+<head>
+<title>Upload Image</title>
+</head>
+<body>
+<h2>Upload Image</h2>
+<form action="upload.php" method="POST" enctype="multipart/form-data">
+<input type="file" name="image" required>
+<button type="submit">Upload</button>
+</form>
+<a href="display.php">View Images</a>
+</body>
+</html>
