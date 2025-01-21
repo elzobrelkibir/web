@@ -1,0 +1,139 @@
+<?php
+include 'db.php';
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+$name = $_POST['name'];
+$age = $_POST['age'];
+$course = $_POST['course'];
+$sql = "INSERT INTO students (name, age, course) VALUES ('$name', '$age',
+'$course')";
+if ($conn->query($sql) === TRUE) {
+echo "New record created successfully";
+} else {
+echo "Error: " . $sql . "<br>" . $conn->error;
+}
+}
+?>
+<!DOCTYPE html>
+<html>
+<head>
+<title>Create Student Record</title>
+</head>
+<body>
+<h2>Add a New Student</h2>
+<form method="POST" action="">
+Name: <input type="text" name="name" required><br>
+Age: <input type="number" name="age" required><br>
+Course: <input type="text" name="course" required><br>
+<input type="submit" value="Add Student">
+</form>
+</body>
+</html>
+
+
+
+
+
+
+
+        <?php
+include 'db.php';
+$sql = "SELECT * FROM students";
+$result = $conn->query($sql);
+?>
+<!DOCTYPE html>
+<html>
+<head>
+<title>View Students</title>
+</head>
+<body>
+<h2>Student Records</h2>
+<table border="1">
+<tr>
+<th>ID</th>
+<th>Name</th>
+<th>Age</th>
+<th>Course</th>
+<th>Actions</th>
+</tr>
+<?php
+if ($result->num_rows > 0) {
+while($row = $result->fetch_assoc()) {
+echo "<tr>";
+echo "<td>" . $row['id'] . "</td>";
+echo "<td>" . $row['name'] . "</td>";
+echo "<td>" . $row['age'] . "</td>";
+echo "<td>" . $row['course'] . "</td>";
+echo "<td>
+<a href='update.php?id=" . $row['id'] . "'>Edit</a> |
+<a href='delete.php?id=" . $row['id'] . "'>Delete</a>
+</td>";
+echo "</tr>";
+}
+} else {
+echo "<tr><td colspan='5'>No records found</td></tr>";
+}
+?>
+</table>
+</body>
+</html>
+
+
+
+
+
+
+                        <?php
+include 'db.php';
+$id = $_GET['id'];
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+$name = $_POST['name'];
+$age = $_POST['age'];
+$course = $_POST['course'];
+$sql = "UPDATE students SET name='$name', age='$age', course='$course' WHERE id=$id";
+if ($conn->query($sql) === TRUE) {
+echo "Record updated successfully";
+header("Location: read.php");
+} else {
+echo "Error updating record: " . $conn->error;
+}
+} else {
+$sql = "SELECT * FROM students WHERE id=$id";
+$result = $conn->query($sql);
+$row = $result->fetch_assoc();
+}
+?>
+<!DOCTYPE html>
+<html>
+<head>
+<title>Update Student Record</title>
+</head>
+<body>
+<h2>Update Student</h2>
+<form method="POST" action="">
+Name: <input type="text" name="name" value="<?php echo $row['name']; ?>" required><br>
+Age: <input type="number" name="age" value="<?php echo $row['age']; ?>" required><br>
+Course: <input type="text" name="course" value="<?php echo $row['course']; ?>" required><br>
+<input type="submit" value="Update Student">
+</form>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+                                  <?php
+include 'db.php';
+$id = $_GET['id'];
+$sql = "DELETE FROM students WHERE id=$id";
+if ($conn->query($sql) === TRUE) {
+echo "Record deleted successfully";
+header("Location: read.php");
+} else {
+echo "Error deleting record: " . $conn->error;
+}
+?>
