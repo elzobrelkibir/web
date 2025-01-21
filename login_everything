@@ -77,3 +77,121 @@ header("Location: login.php");
 
 
 
+//register
+
+
+<?php
+    include 'conn.php';
+    session_start();
+    if(isset($_SESSION['name']))
+    {
+        header("Location: userhome.php");
+    }
+
+    if($_SERVER['REQUEST_METHOD'] == "POST")
+    {
+        $name = $_POST['name'];
+        $email = $_POST['email'];
+        $password = $_POST['password'];
+        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+        
+        $errors = array();
+        
+        if(!filter_var($email, FILTER_VALIDATE_EMAIL))
+        {
+            array_push($erros, "email is not valid");
+        }
+        if(empty($name) or empty($email) or empty($password))
+        {
+            array_push($errors, "all fields are required");
+        }
+        if(strlen($password) < 8)
+        {
+            array_push($errors, "password must be minimum 8 characters");
+        }
+        if(isset($_FILES['image']) && $_FILES['image']['error'] == 0)
+        {
+            $allowed_types = ['image/jpg', 'image/png', 'image/jpeg'];
+            $file_type=  $_FILES['image']['type'];
+            $file_size = $_FILES['image']['size'];
+            $max_size = 2 * 1024 * 1024;
+
+            if(!in_array($file_type, $allowed_types))
+            {
+                array_push($errors, "type not supported");
+            }
+            if($file_size > $max_size)
+            {
+                array_push($errors, "file must be smaller than 2mb");
+            }
+        }
+        else
+        {
+            array_push($erros, "please provide an image file");
+        }
+
+        if(count($errors) > 0)
+        {
+            foreach($errors as $error)
+            {
+                echo $error . "<br>";
+            }
+        }
+        else
+        {
+            $upload_dir = "uploads/";
+            if(!is_dir($upload_dir))
+            {
+                mkdir($upload_dir, 0755, true);
+            }
+
+            $file_name = basename($_FILES['image']['name']);
+            $file_path = $upload_dir . uniqid() . "_" . $file_name;
+
+            if(move_uploaded_file($_FILES['image']['tmp_name'], $file_path))
+            {
+
+                $sql = "INSERT INTO users(username, email, password, image) VALUES('$name', '$email', '$hashed_password', '$file_path')";
+
+                if(mysqli_query($conn, $sql))
+                {
+                    $_SESSION['name'] = $name;
+                    echo "record created succesfully";
+                    header("Location: userhome.php");
+                    exit();
+                }      
+                else
+                {
+                    echo "error creating record";
+                }
+            }
+            else
+            {
+                echo "failed to upload image";
+            }
+        }
+        
+    }
+    ?>
+
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+    </head>
+    <body>
+        <h2>Register</h2>
+        <form action="" method="post" enctype="multipart/form-data">
+        Username: <input type="text" name="name" id=""><br>
+        Email: <input type="email" name="email" id=""><br>
+        password <input type="password" name="password" id=""><br>
+        insert image: <input type="file" name="image" id=""><br>
+        <input type="submit" name="submit" value="register">
+        </form>
+    </body>
+    </html>
+
+
+
